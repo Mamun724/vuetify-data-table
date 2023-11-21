@@ -1205,5 +1205,8 @@ export default createStore({
         soldAmount: 110958.3
       }
     ]
+  },
+  getters: {
+    getPromotions: (state) => state.promotions
   }
 });
