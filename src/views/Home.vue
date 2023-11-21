@@ -2,6 +2,7 @@
 import {useStore} from "vuex";
 import {computed, ref} from "vue";
 import Pagination from "@/components/Pagination.vue";
+import ColumnOptions from "@/components/ColumnOptions.vue";
 
 const store = useStore();
 const data = computed(() => store.getters.getPromotions);
@@ -17,7 +18,7 @@ const allHeaders = [
   {title: "Units Sold", key: "unitsSold", value: item => item.unitsSold, align: "center"},
   {title: "Sold Amount", key: "soldAmount", value: item => getPrice(item.soldAmount), align: "center"},
 ];
-const headers = computed(() => allHeaders);
+const headers = ref([...allHeaders]);
 const page = ref(1);
 const pageSize = ref(10);
 
@@ -62,7 +63,21 @@ function getStatusColor(status) {
 <template>
   <div class="pa-4 promotions-area">
     <h2>Promotions</h2>
+    <div class="d-flex justify-space-between">
+      <v-text-field
+        style="max-width: 250px"
+        hide-details
+        density="compact"
+        placeholder="Search"
+        variant="solo-filled"/>
+      <div>
+        <ColumnOptions
+          :columns="allHeaders"
+          v-model:selected="headers"/>
+      </div>
+    </div>
     <v-data-table
+      class="mt-2"
       :items="data"
       v-model:page="page"
       :items-per-page="pageSize"
@@ -82,10 +97,10 @@ function getStatusColor(status) {
 
       <template v-slot:bottom>
         <div class="mr-1">
-        <Pagination
-          :data-count="data.length"
-          v-model:page="page"
-          v-model:page-size="pageSize"/>
+          <Pagination
+            :data-count="data.length"
+            v-model:page="page"
+            v-model:page-size="pageSize"/>
         </div>
       </template>
     </v-data-table>
