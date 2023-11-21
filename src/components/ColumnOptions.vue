@@ -11,7 +11,7 @@ const props = defineProps({
     required: true
   }
 });
-const emit = defineEmits(["update:headers"]);
+const emit = defineEmits(["update:selected"]);
 const optionColumns = props.columns.map((header, index) => ({...header, order: index}));
 const selectedColumns = ref([...optionColumns]);
 
@@ -28,7 +28,7 @@ watch(selectedColumns, (newColumns) => {
   >
     <template v-slot:activator="{ props }">
       <v-btn
-        style="background-color: #333"
+        class="mr-2"
         v-bind="props"
         prepend-icon="mdi-cog"
         elevation="0">

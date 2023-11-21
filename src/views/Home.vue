@@ -3,6 +3,7 @@ import {useStore} from "vuex";
 import {computed, ref} from "vue";
 import Pagination from "@/components/Pagination.vue";
 import ColumnOptions from "@/components/ColumnOptions.vue";
+import DateRangePicker from "@/components/DateRangePicker.vue";
 
 const store = useStore();
 const data = computed(() => store.getters.getPromotions);
@@ -21,6 +22,10 @@ const allHeaders = [
 const headers = ref([...allHeaders]);
 const page = ref(1);
 const pageSize = ref(10);
+
+function filterByDate({startDate, endDate}) {
+  console.log({startDate, endDate});
+}
 
 function getDateTimeString(isoDateTime) {
   const dateTime = new Date(isoDateTime);
@@ -70,10 +75,11 @@ function getStatusColor(status) {
         density="compact"
         placeholder="Search"
         variant="solo-filled"/>
-      <div>
+      <div class="d-flex ml-2">
         <ColumnOptions
           :columns="allHeaders"
           v-model:selected="headers"/>
+        <DateRangePicker @dateRangeSelected="filterByDate"/>
       </div>
     </div>
     <v-data-table
