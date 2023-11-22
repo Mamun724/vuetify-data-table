@@ -77,6 +77,10 @@ function unselect(value) {
     emit("update:searchCriteria", [...selectedSearchCriteria.value]);
   }
 }
+
+function capitalize(value) {
+  return value[0].toUpperCase() + value.slice(1);
+}
 </script>
 
 <template>
@@ -91,9 +95,9 @@ function unselect(value) {
         :label="true"
         @click:close="unselect(selected)"
       >
-        <span>{{ selected.searchField }}</span>
-        <v-divider v-if="selected.searchValue" class="ml-2" :vertical="true" thickness="2"/>
-        <span class="ml-2">{{ selected.searchValue }}</span>
+        <span>{{ capitalize(selected.searchField) }}</span>
+        <v-icon v-if="selected.searchValue" class="ml-1" size="x-small">mdi-equal</v-icon>
+        <span class="ml-1">{{ selected.searchValue }}</span>
       </v-chip>
     </div>
     <div class="autocomplete-box">
