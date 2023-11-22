@@ -43,8 +43,8 @@ watch(selectedColumns, (newColumns) => {
           v-model="selectedColumns"
           :value="column"
           :label="column.title"
-        hide-details
-        density="compact"/>
+          hide-details
+          density="compact"/>
       </v-form>
     </div>
   </v-menu>

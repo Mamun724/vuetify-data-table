@@ -106,7 +106,8 @@ function getStatusColor(status) {
           :dark="theme.current.value.dark"
           :range="true"
           v-model="date"
-          :enable-time-picker="false"/>
+          :enable-time-picker="false"
+        placeholder="Select Dates"/>
       </div>
     </div>
     <v-data-table
