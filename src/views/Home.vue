@@ -3,10 +3,12 @@ import {useStore} from "vuex";
 import {computed, ref} from "vue";
 import Pagination from "@/components/Pagination.vue";
 import ColumnOptions from "@/components/ColumnOptions.vue";
-import DateRangePicker from "@/components/DateRangePicker.vue";
+import Datepicker from '@vuepic/vue-datepicker';
+import '@vuepic/vue-datepicker/dist/main.css';
+import {useTheme} from "vuetify";
 
 const store = useStore();
-const data = computed(() => store.getters.getPromotions);
+const theme = useTheme();
 const allHeaders = [
   {title: "Type", key: "type", value: item => item.type},
   {title: "SKU", key: "sky", value: item => item.sku},
@@ -19,12 +21,33 @@ const allHeaders = [
   {title: "Units Sold", key: "unitsSold", value: item => item.unitsSold, align: "center"},
   {title: "Sold Amount", key: "soldAmount", value: item => getPrice(item.soldAmount), align: "center"},
 ];
+
+const data = computed(() => store.getters.getPromotions);
+const filteredData = computed(() => filterData());
+
 const headers = ref([...allHeaders]);
 const page = ref(1);
 const pageSize = ref(10);
 
-function filterByDate({startDate, endDate}) {
-  console.log({startDate, endDate});
+const date = ref();
+
+function filterByDate(filteredData) {
+  if (date.value && date.value[0] && date.value[1]) {
+    date.value[0].setHours(0);
+    date.value[0].setMinutes(0);
+    date.value[0].setSeconds(0);
+    date.value[1].setHours(23);
+    date.value[1].setMinutes(59);
+    date.value[1].setSeconds(59);
+    filteredData = filteredData.filter(datum => date.value[0] <= new Date(datum.startDate) && new Date(datum.endDate) <= date.value[1]);
+  }
+  return filteredData;
+}
+
+function filterData() {
+  let filteredData = data.value;
+  filteredData = filterByDate(filteredData);
+  return filteredData;
 }
 
 function getDateTimeString(isoDateTime) {
@@ -79,12 +102,16 @@ function getStatusColor(status) {
         <ColumnOptions
           :columns="allHeaders"
           v-model:selected="headers"/>
-        <DateRangePicker @dateRangeSelected="filterByDate"/>
+        <Datepicker
+          :dark="theme.current.value.dark"
+          :range="true"
+          v-model="date"
+          :enable-time-picker="false"/>
       </div>
     </div>
     <v-data-table
       class="mt-2"
-      :items="data"
+      :items="filteredData"
       v-model:page="page"
       :items-per-page="pageSize"
       :headers="headers">
@@ -104,7 +131,7 @@ function getStatusColor(status) {
       <template v-slot:bottom>
         <div class="mr-1">
           <Pagination
-            :data-count="data.length"
+            :data-count="filteredData.length"
             v-model:page="page"
             v-model:page-size="pageSize"/>
         </div>
