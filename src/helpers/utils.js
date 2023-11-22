@@ -64,3 +64,15 @@ export function filterByType(filteredData, type) {
 
   return filteredData;
 }
+
+export function filterBySearch(filteredData, searchCriteria) {
+  filteredData = filteredData.filter(datum => {
+    for (let criteria of searchCriteria) {
+      if (datum[criteria.searchField] !== criteria.searchValue) {
+        return false;
+      }
+    }
+    return true;
+  });
+  return filteredData;
+}

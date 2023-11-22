@@ -8,12 +8,14 @@ import '@vuepic/vue-datepicker/dist/main.css';
 import {useTheme} from "vuetify";
 import {
   filterByDate,
+  filterBySearch,
   filterByType,
   getDateTimeString,
   getPrice,
   getStatusColor,
   getTypeColor
 } from "@/helpers/utils.js";
+import SearchBox from "@/components/SearchBox.vue";
 
 const store = useStore();
 const theme = useTheme();
@@ -24,11 +26,28 @@ const allHeaders = [
   {title: "Start Date", key: "startDate", value: item => getDateTimeString(item.startDate), sortable: false},
   {title: "End Date", key: "endDate", value: item => getDateTimeString(item.endDate), sortable: false},
   {title: "Your Price", key: "yourPrice", value: item => getPrice(item.yourPrice), align: "end", sortable: false},
-  {title: "Discount Price", key: "discountPrice", value: item => getPrice(item.discountPrice), align: "end", sortable: false},
-  {title: "Discounted Price", key: "discountedPrice", align: "end", sortable: false, cellProps: {class: "discounted-price-column"}},
+  {
+    title: "Discount Price",
+    key: "discountPrice",
+    value: item => getPrice(item.discountPrice),
+    align: "end",
+    sortable: false
+  },
+  {
+    title: "Discounted Price",
+    key: "discountedPrice",
+    align: "end",
+    sortable: false,
+    cellProps: {class: "discounted-price-column"}
+  },
   {title: "Units Sold", key: "unitsSold", value: item => item.unitsSold, align: "end", sortable: false},
   {title: "Sold Amount", key: "soldAmount", value: item => getPrice(item.soldAmount), align: "end", sortable: false},
 ];
+
+const searchFields = {
+  type: ["Coupon", "Percentage Off", "Buy One Get One", "Exclusive Discounts"],
+  status: ["Starting Soon", "In Effect", "Expired"]
+};
 
 const data = computed(() => store.getters.getPromotions);
 const filteredData = computed(() => filterData());
@@ -39,13 +58,15 @@ const pageSize = ref(10);
 
 const filter = ref({
   date: [],
-  type: null
+  type: null,
+  searchCriteria: []
 });
 
 function filterData() {
   let filteredData = data.value;
   filteredData = filterByDate(filteredData, filter.value.date);
   filteredData = filterByType(filteredData, filter.value.type);
+  filteredData = filterBySearch(filteredData, filter.value.searchCriteria);
   return filteredData;
 }
 </script>
@@ -64,13 +85,9 @@ function filterData() {
       <v-tab value="Coupon">Coupons</v-tab>
     </v-tabs>
     <div class="d-flex justify-space-between mt-2">
-      <v-text-field
-        style="max-width: 250px"
-        hide-details
-        density="compact"
-        placeholder="Search"
-        variant="outlined"
-        append-inner-icon="mdi-magnify"/>
+      <SearchBox
+        v-model:search-criteria="filter.searchCriteria"
+        :columns-and-values="searchFields"/>
       <div class="d-flex ml-2">
         <ColumnOptions
           :columns="allHeaders"
