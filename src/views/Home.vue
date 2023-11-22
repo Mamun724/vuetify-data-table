@@ -6,20 +6,28 @@ import ColumnOptions from "@/components/ColumnOptions.vue";
 import Datepicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css';
 import {useTheme} from "vuetify";
+import {
+  filterByDate,
+  filterByType,
+  getDateTimeString,
+  getPrice,
+  getStatusColor,
+  getTypeColor
+} from "@/helpers/utils.js";
 
 const store = useStore();
 const theme = useTheme();
 const allHeaders = [
-  {title: "Type", key: "type", value: item => item.type},
-  {title: "SKU", key: "sky", value: item => item.sku},
-  {title: "Status", key: "status", value: item => item.status},
-  {title: "Start Date", key: "startDate", value: item => getDateTimeString(item.startDate)},
-  {title: "End Date", key: "endDate", value: item => getDateTimeString(item.endDate)},
-  {title: "Your Price", key: "yourPrice", value: item => getPrice(item.yourPrice), align: "center"},
-  {title: "Discount Price", key: "discountPrice", value: item => getPrice(item.discountPrice), align: "center"},
-  {title: "Discounted Price", key: "discountedPrice", align: "center", cellProps: {class: "discounted-price-column"}},
-  {title: "Units Sold", key: "unitsSold", value: item => item.unitsSold, align: "center"},
-  {title: "Sold Amount", key: "soldAmount", value: item => getPrice(item.soldAmount), align: "center"},
+  {title: "Type", key: "type", sortable: false},
+  {title: "SKU", key: "sku", sortable: false},
+  {title: "Status", key: "status", sortable: false},
+  {title: "Start Date", key: "startDate", value: item => getDateTimeString(item.startDate), sortable: false},
+  {title: "End Date", key: "endDate", value: item => getDateTimeString(item.endDate), sortable: false},
+  {title: "Your Price", key: "yourPrice", value: item => getPrice(item.yourPrice), align: "end", sortable: false},
+  {title: "Discount Price", key: "discountPrice", value: item => getPrice(item.discountPrice), align: "end", sortable: false},
+  {title: "Discounted Price", key: "discountedPrice", align: "end", sortable: false, cellProps: {class: "discounted-price-column"}},
+  {title: "Units Sold", key: "unitsSold", value: item => item.unitsSold, align: "end", sortable: false},
+  {title: "Sold Amount", key: "soldAmount", value: item => getPrice(item.soldAmount), align: "end", sortable: false},
 ];
 
 const data = computed(() => store.getters.getPromotions);
@@ -29,67 +37,16 @@ const headers = ref([...allHeaders]);
 const page = ref(1);
 const pageSize = ref(10);
 
-const date = ref();
-const tab = ref(null);
-
-function filterByDate(filteredData) {
-  if (date.value && date.value[0] && date.value[1]) {
-    date.value[0].setHours(0);
-    date.value[0].setMinutes(0);
-    date.value[0].setSeconds(0);
-    date.value[1].setHours(23);
-    date.value[1].setMinutes(59);
-    date.value[1].setSeconds(59);
-    filteredData = filteredData.filter(datum => date.value[0] <= new Date(datum.startDate) && new Date(datum.endDate) <= date.value[1]);
-  }
-  return filteredData;
-}
+const filter = ref({
+  date: [],
+  type: null
+});
 
 function filterData() {
   let filteredData = data.value;
-  filteredData = filterByDate(filteredData);
-  console.log(tab.value);
-  if (tab.value) {
-    filteredData = filteredData.filter(datum => datum.type === tab.value);
-  }
+  filteredData = filterByDate(filteredData, filter.value.date);
+  filteredData = filterByType(filteredData, filter.value.type);
   return filteredData;
-}
-
-function getDateTimeString(isoDateTime) {
-  const dateTime = new Date(isoDateTime);
-  return `${dateTime.toLocaleDateString()} ${dateTime.toLocaleTimeString()}`
-}
-
-function getPrice(price) {
-  return `$${price}`;
-}
-
-function getTypeColor(type) {
-  switch (type) {
-    case "Coupon":
-      return "blue";
-    case "Percentage Off":
-      return "green";
-    case "Exclusive Discounts":
-      return "indigo";
-    case "Buy One Get One":
-      return "yellow";
-    default:
-      return "error";
-  }
-}
-
-function getStatusColor(status) {
-  switch (status) {
-    case "Expired":
-      return "warning";
-    case "In Effect":
-      return "primary";
-    case "Starting Soon":
-      return "secondary"
-    default:
-      return "error";
-  }
 }
 </script>
 
@@ -97,7 +54,7 @@ function getStatusColor(status) {
   <div class="pa-4 promotions-area">
     <h2>Promotions</h2>
     <v-tabs
-      v-model="tab"
+      v-model="filter.type"
       color="primary"
       class="tabs"
     >
@@ -112,7 +69,8 @@ function getStatusColor(status) {
         hide-details
         density="compact"
         placeholder="Search"
-        variant="solo-filled"/>
+        variant="outlined"
+        append-inner-icon="mdi-magnify"/>
       <div class="d-flex ml-2">
         <ColumnOptions
           :columns="allHeaders"
@@ -120,7 +78,7 @@ function getStatusColor(status) {
         <Datepicker
           :dark="theme.current.value.dark"
           :range="true"
-          v-model="date"
+          v-model="filter.date"
           :enable-time-picker="false"
           placeholder="Select Dates"/>
       </div>
@@ -167,6 +125,7 @@ function getStatusColor(status) {
 
     .discounted-price-column {
       background-color: #333333;
+      white-space: nowrap;
     }
   }
 }
