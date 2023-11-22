@@ -30,6 +30,7 @@ import Sidebar from "@/components/Sidebar.vue";
   }
 
   .main {
+    margin-top: var(--header-height);
     margin-left: var(--side-bar-width);
   }
 }
