@@ -30,6 +30,7 @@ const page = ref(1);
 const pageSize = ref(10);
 
 const date = ref();
+const tab = ref(null);
 
 function filterByDate(filteredData) {
   if (date.value && date.value[0] && date.value[1]) {
@@ -47,6 +48,10 @@ function filterByDate(filteredData) {
 function filterData() {
   let filteredData = data.value;
   filteredData = filterByDate(filteredData);
+  console.log(tab.value);
+  if (tab.value) {
+    filteredData = filteredData.filter(datum => datum.type === tab.value);
+  }
   return filteredData;
 }
 
@@ -91,7 +96,17 @@ function getStatusColor(status) {
 <template>
   <div class="pa-4 promotions-area">
     <h2>Promotions</h2>
-    <div class="d-flex justify-space-between">
+    <v-tabs
+      v-model="tab"
+      color="primary"
+      class="tabs"
+    >
+      <v-tab :value="null">All</v-tab>
+      <v-tab value="Buy One Get One">Promotions</v-tab>
+      <v-tab value="Exclusive Discounts">Exclusive Discounts</v-tab>
+      <v-tab value="Coupon">Coupons</v-tab>
+    </v-tabs>
+    <div class="d-flex justify-space-between mt-2">
       <v-text-field
         style="max-width: 250px"
         hide-details
@@ -107,7 +122,7 @@ function getStatusColor(status) {
           :range="true"
           v-model="date"
           :enable-time-picker="false"
-        placeholder="Select Dates"/>
+          placeholder="Select Dates"/>
       </div>
     </div>
     <v-data-table
@@ -143,6 +158,10 @@ function getStatusColor(status) {
 
 <style lang="scss">
 .promotions-area {
+  .tabs {
+    border-bottom: 1px solid #333333;
+  }
+
   .v-data-table__tr {
     color: darkgrey;
 
